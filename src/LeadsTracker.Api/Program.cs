@@ -1,9 +1,13 @@
+using System.Text.Json.Serialization;
 using LeadsTracker.Api.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<LeadsDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
