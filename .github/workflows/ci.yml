@@ -49,3 +49,29 @@ jobs:
       - name: Build web app
         run: npm run build
         working-directory: web
+
+  selenium:
+    if: github.base_ref != 'dev'
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Start the full app
+        run: docker compose -f docker-compose.e2e.yml up -d --build
+
+      - name: Run Selenium tests
+        run: dotnet test tests/LeadsTracker.E2E
+
+      - name: Show app logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.e2e.yml logs
+
+      - name: Stop the app
+        if: always()
+        run: docker compose -f docker-compose.e2e.yml down
