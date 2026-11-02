@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [dev, qa, uat, main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: leadstracker
+          POSTGRES_USER: leads_app
+          POSTGRES_PASSWORD: leads_dev_password
+        ports:
+          - 5435:5432
+        options: >-
+          --health-cmd "pg_isready -U leads_app -d leadstracker"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore .NET packages
+        run: dotnet restore
+
+      - name: Run API tests
+        run: dotnet test --no-restore
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install web packages
+        run: npm ci
+        working-directory: web
+
+      - name: Build web app
+        run: npm run build
+        working-directory: web
