@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: leadstracker-db
+    environment:
+      POSTGRES_DB: leadstracker
+      POSTGRES_USER: leads_app
+      POSTGRES_PASSWORD: leads_dev_password
+    ports:
+      - "5435:5432"
+    volumes:
+      - leadstracker-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U leads_app -d leadstracker"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  leadstracker-data:
