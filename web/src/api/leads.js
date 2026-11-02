@@ -15,3 +15,18 @@ export async function listLeads(filters, signal) {
 
   return response.json()
 }
+
+export async function createLead(lead) {
+  const response = await fetch('/api/leads', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(lead)
+  })
+
+  if (response.ok) {
+    return { ok: true, lead: await response.json() }
+  }
+
+  const problem = await response.json().catch(() => null)
+  return { ok: false, status: response.status, problem }
+}
