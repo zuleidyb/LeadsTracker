@@ -75,3 +75,12 @@ jobs:
       - name: Stop the app
         if: always()
         run: docker compose -f docker-compose.e2e.yml down
+
+  uat-approval:
+    if: github.base_ref == 'uat'
+    needs: selenium
+    runs-on: ubuntu-latest
+    environment: uat
+    steps:
+      - name: Record UAT sign-off
+        run: echo "UAT approved"
